@@ -178,3 +178,88 @@ La page affiche :
 Conclusion : les origines CORS sont correctement limitées.
 L'authentification reste nécessaire indépendamment de CORS.
 
+
+---
+
+# Atelier 6 - Packaging de LogiAI
+
+## Objectif
+
+Transformer LogiAI en un package Python installable,
+distribuable et utilisable dans Docker.
+
+## Etape 1 - Probleme initial
+
+Sans installation du package, un collegue doit recuperer
+le code source, installer les dependances et configurer
+le chemin permettant d'importer LogiAI.
+
+## Etapes 2 et 3 - Installation
+
+- Creation de pyproject.toml.
+- Version du package : 0.1.0.
+- Installation en mode editable.
+- Avant installation : 54 passed, 2 failed.
+- Apres installation : 55 passed, 1 failed.
+
+Les echecs intermediaires etaient attendus.
+
+## Etape 4 - Commande CLI
+
+- Creation de logiai-predict.
+- Livraison normale : 73 % (ALERTE).
+- Livraison avec 500 mm de pluie : 100 % (ALERTE).
+- Resultat final : 57 tests reussis.
+
+L'API refuse les 500 mm de pluie avec HTTP 422.
+Pydantic impose une limite maximale de 100 mm.
+La CLI transmet directement les donnees au modele
+sans appliquer cette validation.
+
+## Etape 5 - Construction du Wheel
+
+- logiai-0.1.0-py3-none-any.whl
+- logiai-0.1.0.tar.gz
+
+Le Wheel contient le code Python et ses metadonnees.
+Il ne contient ni models, ni data, ni tests, ni .env.
+LOGIAI_HOME permet de retrouver les ressources externes.
+
+Test sans LOGIAI_HOME : FileNotFoundError (models/model.joblib introuvable).
+Test avec LOGIAI_HOME : Probabilite de retard de 73 % (ALERTE).
+Le test du Wheel dans un environnement independant est valide.
+
+## Etape 6 - Docker et Nginx
+
+Image Docker : logiai:tp6.
+
+Chemin du package installe :
+/usr/local/lib/python3.11/site-packages/logiai/__init__.py
+
+Le dossier /app contient data, models et requirements.txt.
+Le dossier source logiai est absent de /app.
+
+Resultats obtenus :
+- Health Check : OK.
+- Modele charge : True.
+- Authentification configuree : True.
+- Sans cle API : HTTP 401.
+- Avec cle API : HTTP 200.
+- Probabilite de retard : 73,2 %.
+- Seuil d'alerte : 40 %.
+- Version du modele : 1.0.
+- Pluie hors limites : HTTP 422.
+
+Les erreurs de telechargement Docker ont ete resolues
+par le cache pip et une configuration reseau plus robuste.
+
+Nginx est accessible sur le port 8081, car le port 8080
+est deja utilise par Oracle Database.
+
+## Conclusion
+
+LogiAI est desormais un package Python installable.
+Le code, les donnees et le modele sont separes.
+Le systeme propose une CLI, une API securisee et
+une interface web servie par Nginx.
+

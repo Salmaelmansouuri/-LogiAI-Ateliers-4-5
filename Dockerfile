@@ -1,13 +1,16 @@
-﻿FROM python:3.11-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip python -m pip install --timeout 300 --retries 10 -r requirements.txt
 
-COPY logiai/ ./logiai/
+COPY pyproject.toml /tmp/build/
+COPY logiai/ /tmp/build/logiai/
+RUN pip install --no-cache-dir --no-deps /tmp/build && rm -rf /tmp/build
 COPY models/ ./models/
+COPY data/ ./data/
 
 EXPOSE 8000
 
