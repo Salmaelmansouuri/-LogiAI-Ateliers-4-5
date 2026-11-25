@@ -3,7 +3,7 @@
   "poids_kg": 450.0,
   "heure_depart": 17,
   "pluie_mm": 8.0,
-  "trafic_index": 7.5,
-  "nb_arrets": 4,
+  "trafic_index": 7.0,
+  "nb_arrets": 5,
   "type_vehicule": "camion"
 }

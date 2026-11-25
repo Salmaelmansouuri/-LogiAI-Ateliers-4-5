@@ -6,7 +6,9 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY logiai/ ./logiai/
+COPY pyproject.toml /tmp/build/
+COPY logiai/ /tmp/build/logiai/
+RUN pip install --no-cache-dir --no-deps /tmp/build && rm -rf /tmp/build
 COPY models/ ./models/
 
 EXPOSE 8000
